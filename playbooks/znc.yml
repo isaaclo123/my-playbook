@@ -1,0 +1,134 @@
+---
+
+- hosts: all
+  become: yes
+  roles:
+  - role: ansible-znc
+    znc_force_config_refresh: yes
+    # This is hacky, but should inject extra listener info into the config file
+    # first injected listener should be web, port znc_web_port
+    # second listener should be irc, port znc_irc_port
+
+    # https://stackoverflow.com/questions/34236949/znc-on-a-subdomain-with-nginx-reverse-proxy
+    znc_port: |
+      {{ znc_web_port }}
+      AllowIRC = false
+      AllowWeb = true
+      Host = localhost
+      IPv4 = true
+      IPv6 = false
+      SSL = false
+      URIPrefix = /znc/
+      </Listener>
+      <Listener i>
+      AllowIRC = true
+      AllowWeb = false
+      URIPrefix = /
+      Port = {{ znc_irc_port }}
+    # znc_ssl_certificate_file: "{{ ssl_certificate }}"
+    znc_force_config_refresh: true
+    znc_ssl: true
+
+    znc_user_name: "{{ user_name }}"
+    znc_user_password: "{{ znc_password }}"
+    znc_user_nick: "{{ nick_name }}"
+    znc_user_altnick: "{{ nick_name }}_"
+    znc_user_realname: "{{ real_name }}"
+    znc_user_buffer: 70
+    znc_user_autoclearchanbuffer: true
+    znc_system_modules:
+    - playback
+    - partyline
+    - webadmin
+    - fail2ban
+    znc_user_modules:
+    - chansaver
+    - controlpanel
+    - perform
+    - webadmin
+
+- name: Build and install znc playback module and setup letsencrypt ssl hook
+  hosts: all
+  become: yes
+  vars:
+
+    znc_datadir: /var/lib/znc
+    update_script: /etc/letsencrypt/renewal-hooks/deploy/update-znc-pem.sh
+
+  tasks:
+
+  - name: check if playback plugin file exists
+    stat:
+      path: "{{ znc_datadir }}/modules/playback.so"
+    register: playback_plugin
+
+  - name: Install znc-dev
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - git
+      - znc-dev
+    when: playback_plugin.stat.exists == false
+
+  - name: create temporary build directory
+    tempfile:
+      state: directory
+      suffix: zncplayback
+    register: zncplayback
+    when: playback_plugin.stat.exists == false
+
+  - name: Get znc playback module from git
+    git:
+      repo: https://github.com/jpnurmi/znc-playback.git
+      dest: "{{ zncplayback.path }}"
+    when: playback_plugin.stat.exists == false
+
+  - name: Creates modules directory
+    file:
+      path: "{{ znc_datadir }}/modules/"
+      state: directory
+      owner: znc
+      group: znc
+    when: playback_plugin.stat.exists == false
+
+  - name: Compile znc playback module
+    command: znc-buildmod playback.cpp
+    # become: yes
+    # become_user: znc
+    args:
+      chdir: "{{ zncplayback.path }}"
+    when: playback_plugin.stat.exists == false
+
+  - name: Copy znc playback module
+    copy:
+      src: "{{ zncplayback.path }}/playback.so"
+      dest: "{{ znc_datadir }}/modules/"
+      force: yes
+      remote_src: yes
+      owner: znc
+      group: znc
+    when: playback_plugin.stat.exists == false
+
+  - name: Clean znc playback build folder
+    file:
+      state: absent
+      path: "{{ zncplayback.path }}/"
+    when: playback_plugin.stat.exists == false
+
+  - name: Create update hook script
+    copy:
+      dest: "{{ update_script }}"
+      content: |
+        #!/bin/bash
+        cat /etc/letsencrypt/live/{{ domain }}/{privkey,fullchain}.pem > {{ znc_datadir }}/znc.pem
+      mode: 0775
+
+  - name: Run update hook script
+    command: "bash {{ update_script }}"
+
+  - name: restart znc
+    systemd:
+      name: znc
+      state: restarted
+      daemon_reload: yes

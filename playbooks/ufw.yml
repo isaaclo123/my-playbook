@@ -1,0 +1,26 @@
+---
+
+- hosts: all
+  become: yes
+  roles:
+    - role: weareinteractive.ufw
+      vars:
+        ufw_reset: yes
+        ufw_rules:
+          - { port: "{{ ssh_port }}", rule: allow, comment: 'Allow SSH' }
+          # - { port: "{{ radicale_port }}", rule: allow, comment: 'Allow Radicale'}
+          - { port: "{{ znc_irc_port }}", rule: allow, comment: 'Allow ZNC'}
+          - { port: "{{ http_port }}", rule: allow, comment: 'Allow http'}
+          - { port: "{{ https_port }}", rule: allow, comment: 'Allow https'}
+          - { port: "{{ syncthing_listen_port }}", proto: udp, rule: allow, comment: 'Allow syncthing listen'}
+          - { port: "{{ openvpn_server_port }}", proto: udp, rule: allow, comment: 'Allow openvpn'}
+        ufw_default_forward_policy: ACCEPT
+        ufw_logging: full
+        ufw_ipv6: "no"
+        # ufw_applications:
+        #  - { name: "OpenSSH" }
+        handlers:
+          - name: restart UFW
+            service:
+              name: ufw
+              state: reloaded

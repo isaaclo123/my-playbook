@@ -1,0 +1,19 @@
+#!/usr/bin/env ansible-playbook
+
+- import_playbook: ./playbooks/ufw.yml
+
+- import_playbook: ./playbooks/debian.yml
+
+- import_playbook: ./playbooks/fail2ban.yml
+
+- import_playbook: ./playbooks/letsencrypt.yml
+
+- import_playbook: ./playbooks/bitlbee.yml
+
+- import_playbook: ./playbooks/znc.yml
+
+- import_playbook: ./playbooks/radicale.yml
+
+- import_playbook: ./playbooks/syncthing.yml
+
+- import_playbook: ./playbooks/openvpn.yml

@@ -1,0 +1,110 @@
+---
+
+- name: Install bitlbee
+  hosts: all
+  become: yes
+  roles:
+  - role: smaffulli.bitlbee
+    bitlbee_port: "{{ bitlbee_server_port }}"
+    authmode: closed
+
+    bitlbee_oper_pass: "{{ bitlbee_password }}"
+
+    bitlbee_user: "{{ user_name }}"
+    bitlbee_pass: "{{ bitlbee_password }}"
+
+    # I only use Jabber so I've only managed to scrip this part
+    # patches welcome to configure other protocols
+    jabber_handle: ""
+    # as above, RC4 hash -TO BE TESTED
+    jabber_pwd: ""
+    jabber_server: ""
+    jabber_conference: ""
+
+    # Jabber groupchats to join
+    jabber_channels: []
+
+    # configuration for the users file where the IM credentials go
+    # these will populate the xml configuration file
+    # usually created by chatting with the &bitlbee bot
+    # bitlbee_user: $YOUR_USER
+    # # this password is created with RC4 hashing
+    # bitlbee_pass: $THEPASS
+
+- name: install bitlbee-discord plugin
+  hosts: all
+  become: yes
+  tasks:
+  - name: check if bitlbee discord plugin file exists
+    stat:
+      path: "/usr/lib/bitlbee/discord.so"
+    register: bitlbee_plugin
+
+  - name: Install bitlbee packages
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - libtool
+      - autoconf
+      - automake
+      - autotools-dev
+      - build-essential
+      - bitlbee-dev
+      - libglib2.0-dev
+    when: bitlbee_plugin.stat.exists == false
+
+  - name: create temporary build directory
+    tempfile:
+      state: directory
+      suffix: bitlbeediscord
+    register: bitlbeediscord
+    when: bitlbee_plugin.stat.exists == false
+
+  - name: Get bitlbee-discord module from git
+    git:
+      repo: https://github.com/sm00th/bitlbee-discord
+      dest: "{{ bitlbeediscord.path }}"
+    when: bitlbee_plugin.stat.exists == false
+
+  - name: Compile bitlbee-discord module
+    shell: |
+      ./autogen.sh
+      ./configure --with-plugindir=/usr/lib/bitlbee
+      make
+      sudo make install
+    args:
+      chdir: "{{ bitlbeediscord.path }}/"
+    when: bitlbee_plugin.stat.exists == false
+
+  - name: Clean bitlbee-discord build folder
+    file:
+      state: absent
+      path: "{{ bitlbeediscord.path }}/"
+    when: bitlbee_plugin.stat.exists == false
+
+- name: install bitlbee-facebook
+  hosts: all
+  become: yes
+  tasks:
+  - name: Add bitlbee-facebook apt signing key
+    apt_key:
+      url: https://jgeboski.github.io/obs.key
+      state: present
+
+  - name: add bitlbee-facebook repository
+    apt_repository:
+      repo: deb http://download.opensuse.org/repositories/home:/jgeboski/Debian_9.0 ./
+      state: present
+
+  - name: Install bitlbee packages
+    apt:
+      name: bitlbee-facebook
+
+- name: restart bitlbee
+  hosts: all
+  tasks:
+  - systemd:
+      name: bitlbee
+      state: restarted
+      daemon_reload: yes

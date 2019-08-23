@@ -1,0 +1,34 @@
+---
+
+- name: Upgrade debian from jessie to stretch
+  hosts: all
+  become: true
+  tasks:
+  - name: turn jessie to stretch in sources.list
+    command: "sed -i 's/jessie/stretch/g' /etc/apt/sources.list"
+  - name: apt upgrade
+    apt:
+      upgrade: full
+      update_cache: yes
+  - name: Remove dependencies that are no longer required
+    apt:
+      autoremove: yes
+
+- name: setup TUN/TAP
+  hosts: all
+  become: true
+  tasks:
+  - name: check if /dev/net/tun exists
+    stat:
+      path: "/dev/net/tun"
+    register: tun
+
+  - name: setup TUN/TAP
+    command: "{{ item }}"
+    args:
+      chdir: /dev/
+    with_items:
+      - mkdir net
+      - mknod net/tun c 10 200
+      - chmod 0666 net/tun
+    when: tun.stat.exists == false

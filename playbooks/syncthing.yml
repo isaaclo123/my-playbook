@@ -1,0 +1,63 @@
+---
+
+- name: Syncthing Install and setup
+  hosts: all
+  become: True
+  vars:
+    syncthing_datadir: /var/lib/syncthing
+  tasks:
+  - name: Install Syncthing install dependacies
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - apt-transport-https
+      - curl
+
+  - name: Add Syncthing apt signing key
+    apt_key:
+      url: https://syncthing.net/release-key.txt
+      state: present
+
+  - name: add Syncthing repository
+    apt_repository:
+      repo: deb https://apt.syncthing.net/ syncthing stable
+      state: present
+
+  - name: Install Syncthing
+    apt:
+      name: syncthing
+      update_cache: yes
+
+  - name: Add Syncthing user
+    user:
+      name: syncthing
+      home: "{{ syncthing_datadir }}"
+      comment: Syncthing user
+      system: yes
+
+# - name: syncthing install and configure
+#   hosts: all
+#   become: True
+#   vars:
+#     syncthing_datadir: /var/lib/syncthing
+#   roles:
+#     - role: escaped.Syncthing
+#       syncthing_user: syncthing
+#       syncthing_address: "0.0.0.0:{{ syncthing_web_port }}"
+#       syncthing_listen: "0.0.0.0:{{ syncthing_listen_port }}"
+#       syncthing_home: "{{ syncthing_datadir }}"
+#       syncthing_localannounce: true
+#       syncthing_globalannounce: true
+#       syncthing_upnp: false
+#       syncthing_use_ufw: false
+#       syncthing_use_systemd: true
+#       syncthing_use_supervisor: false
+
+- name: syncthing nginx password
+  hosts: all
+  become: True
+  tasks:
+  - name: generate htpasswd file for syncthing
+    command: "htpasswd -bc /etc/nginx/.htpasswd-syncthing {{ user_name }} {{ syncthing_password }}"
+    no_log: true

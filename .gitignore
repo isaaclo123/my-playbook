@@ -1,0 +1,7 @@
+roles/*
+*.retry
+
+# temp
+group_vars/*
+
+inventory.*

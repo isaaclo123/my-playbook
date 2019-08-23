@@ -1,0 +1,25 @@
+---
+
+# - hosts: all
+#   become: yes
+#   tasks:
+#   - name: Create client credential directory
+#     file:
+#       path: "{{ openvpn_credential_path }}"
+#       state: directory
+
+- hosts: all
+  become: yes
+  vars:
+    openvpn_use_pam: true
+    openvpn_download_clients: true
+    openvpn_download_dir: "{{ openvpn_credential_path }}"
+    openvpn_keydir: "{{ openvpn_key_path }}"
+    openvpn_clients: "{{ openvpn_client_list }}"
+    openvpn_use_pam_users:
+      - name: "{{ user_name }}"
+        password: "{{ openvpn_password }}"
+    openvpn_port: "{{ openvpn_server_port }}"
+    openvpn_proto: udp
+  roles:
+    - ansible-openvpn

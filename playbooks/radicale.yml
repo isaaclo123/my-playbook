@@ -1,0 +1,14 @@
+---
+
+- hosts: all
+  become: yes
+  roles:
+  - role: ansible-role-radicale
+    server:
+        hosts:
+          - addr: 0.0.0.0
+            port: "{{ radcale_port }}"
+    radicale_users:
+      # TODO: change this
+      - name: "{{ user_name }}"
+        password: "{{ radicale_password }}"

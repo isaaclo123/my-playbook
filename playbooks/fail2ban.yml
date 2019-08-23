@@ -1,0 +1,17 @@
+---
+
+- name: fail2ban
+  hosts: all
+  become: yes
+  roles:
+    - role: nickjj.fail2ban
+      fail2ban_backend: gamin
+      fail2ban_services:
+        - name: ssh
+          port: "{{ ssh_port }}"
+          filter: sshd
+          logpath: /var/log/auth.log
+          # - name: irc
+          #   port: irc
+          #   filter: irc
+          #   logpath: /var/log/znc.log

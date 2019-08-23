@@ -1,0 +1,24 @@
+---
+
+- name: ansible-role-radicale
+  src: https://github.com/AnarchoTechNYC/ansible-role-radicale
+
+- name: ansible-znc
+  src: https://github.com/isaaclo123/ansible-znc
+
+- name: ansible-openvpn
+  src: https://github.com/Stouts/Stouts.openvpn
+
+- src: jdauphant.nginx
+
+- src: weareinteractive.ufw
+
+- src: thefinn93.letsencrypt
+  # - src: spk.syncthing-debian
+- src: escaped.Syncthing
+
+- src: smaffulli.bitlbee
+  # - src: dhellman.znc-on-znc
+- src: nickjj.fail2ban
+
+# - src: Stouts.openvpn
