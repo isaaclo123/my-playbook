@@ -24,7 +24,7 @@ user_name: isaac
 real_name: Isaac Lo
 nick_name: isaaclo123
 
-domain: vps.myrdd.info
+domain: isaaclo.site
 email: isaaclo123@gmail.com
 
 ssl_cert_path: "/etc/ssl/certs/letsencrypt-ssl-cert.pem"
