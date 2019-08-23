@@ -1,8 +1,8 @@
 #!/usr/bin/env ansible-playbook
 
-- import_playbook: ./playbooks/ufw.yml
-
 - import_playbook: ./playbooks/debian.yml
+
+- import_playbook: ./playbooks/ufw.yml
 
 - import_playbook: ./playbooks/fail2ban.yml
 

@@ -1,5 +1,19 @@
 ---
 
+- name: Remove apache2
+  hosts: all
+  become: yes
+  tasks:
+  - name: Stop apache2
+    systemd:
+      name: apache2
+      state: stopped
+      daemon_reload: yes
+  - name: Remove apache2 package
+    apt:
+      name: apache2
+      state: absent
+
 - name: Upgrade debian from jessie to stretch
   hosts: all
   become: true

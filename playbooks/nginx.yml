@@ -1,18 +1,5 @@
 ---
 
-- name: Remove apache2
-  hosts: all
-  become: yes
-  tasks:
-  - name: Remove apache2 package
-    apt:
-      name: apache2
-      state: absent
-
-  - name: autoremove
-    apt:
-      autoremove: yes
-
 - name: nginx
   hosts: all
   become: yes
