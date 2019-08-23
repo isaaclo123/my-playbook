@@ -36,23 +36,52 @@
       comment: Syncthing user
       system: yes
 
-# - name: syncthing install and configure
-#   hosts: all
-#   become: True
-#   vars:
-#     syncthing_datadir: /var/lib/syncthing
-#   roles:
-#     - role: escaped.Syncthing
-#       syncthing_user: syncthing
-#       syncthing_address: "0.0.0.0:{{ syncthing_web_port }}"
-#       syncthing_listen: "0.0.0.0:{{ syncthing_listen_port }}"
-#       syncthing_home: "{{ syncthing_datadir }}"
-#       syncthing_localannounce: true
-#       syncthing_globalannounce: true
-#       syncthing_upnp: false
-#       syncthing_use_ufw: false
-#       syncthing_use_systemd: true
-#       syncthing_use_supervisor: false
+- name: syncthing install and configure
+  hosts: all
+  become: True
+  vars:
+    syncthing_datadir: /var/lib/syncthing
+  roles:
+    - role: escaped.Syncthing
+      syncthing_user: syncthing
+      syncthing_address: "0.0.0.0:{{ syncthing_web_port }}"
+      syncthing_listen: "0.0.0.0:{{ syncthing_listen_port }}"
+      syncthing_home: "{{ syncthing_datadir }}"
+      syncthing_localannounce: true
+      syncthing_globalannounce: true
+      syncthing_upnp: false
+      syncthing_use_ufw: false
+      syncthing_use_systemd: true
+      syncthing_use_supervisor: false
+
+- name: Fix syncthing to use system syncthing
+  vars:
+    syncthing_datadir: /var/lib/syncthing
+  hosts: all
+  become: True
+  tasks:
+  - lineinfile:
+      path: /etc/systemd/system/syncthing.service
+      regexp: ExecStart=/var/lib/syncthing/bin/syncthing
+      line: "ExecStart=/usr/bin/syncthing -home={{ syncthing_datadir }}"
+      state: present
+
+  - name: restart syncthing
+    systemd:
+      name: syncthing
+      state: restarted
+      daemon_reload: yes
+
+  - name: check if syncthing bin file exists
+    stat:
+      path: "{{ syncthing_datadir }}/bin/syncthing"
+    register: syncthing_bin
+
+  - name: Remove syncthing bin folder
+    file:
+      state: absent
+      path: "{{ syncthing_datadir }}/bin/"
+    when: syncthing_bin.stat.exists == true
 
 - name: syncthing nginx password
   hosts: all
@@ -61,3 +90,8 @@
   - name: generate htpasswd file for syncthing
     command: "htpasswd -bc /etc/nginx/syncthing.htpasswd {{ user_name }} {{ syncthing_password }}"
     no_log: true
+
+  # - name: restart nginx
+  #   systemd:
+  #     name: nginx
+  #     state: restarted
