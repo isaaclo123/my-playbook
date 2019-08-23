@@ -47,11 +47,24 @@
     - perform
     - webadmin
 
+- name: Fix service file by removing incorrect znc file sections
+  hosts: all
+  become: yes
+  tasks:
+    - lineinfile:
+        path: /etc/systemd/system/znc.service
+        regexp: "{{ item }}"
+        # State is set to Absent to remove if the Searching Line is found
+        state: absent
+      with_items:
+        - CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+        - AmbientCapabilities=CAP_NET_BIND_SERVICE
+        - NoNewPrivileges=true
+
 - name: Build and install znc playback module and setup letsencrypt ssl hook
   hosts: all
   become: yes
   vars:
-
     znc_datadir: /var/lib/znc
     update_script: /etc/letsencrypt/renewal-hooks/deploy/update-znc-pem.sh
 

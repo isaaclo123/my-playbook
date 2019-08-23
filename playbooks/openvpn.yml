@@ -14,7 +14,6 @@
     openvpn_use_pam: true
     openvpn_download_clients: true
     openvpn_download_dir: "{{ openvpn_credential_path }}"
-    openvpn_keydir: "{{ openvpn_key_path }}"
     openvpn_clients: "{{ openvpn_client_list }}"
     openvpn_use_pam_users:
       - name: "{{ user_name }}"

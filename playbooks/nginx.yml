@@ -9,8 +9,8 @@
       - nginx-full
     nginx_configs:
       ssl:
-        - ssl_certificate {{ ssl_cert_path }}
-        - ssl_certificate_key {{ ssl_privkey_path }}
+        - ssl_certificate "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+        - ssl_certificate_key "/etc/letsencrypt/live/{{ domain }}/privkey.pem"
         - ssl_session_cache shared:SSL:20m
         - ssl_session_timeout 60m
         - ssl_prefer_server_ciphers on
@@ -62,9 +62,9 @@
         - |
           location /syncthing/ {
             auth_basic "Restricted Content (Syncthing)";
-            auth_basic_user_file /etc/nginx/.htpasswd-syncthing;
+            auth_basic_user_file /etc/nginx/syncthing.htpasswd;
 
-            proxy_pass              http://0.0.0.0:{{ syncthing_port }}/;
+            proxy_pass              http://0.0.0.0:{{ syncthing_web_port }}/;
             proxy_set_header        Authorization "";
             proxy_set_header        Host $host;
             proxy_set_header        X-Real-IP $remote_addr;

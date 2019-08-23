@@ -21,5 +21,5 @@
       letsencrypt_cert_domains:
         - "{{ domain }}"
       letsencrypt_renewal_command_args: '--renew-hook "systemctl restart nginx"'
-      ssl_certificate: "{{ ssl_cert_path }}"
-      ssl_certificate_key: "{{ ssl_privkey_path }}"
+      # ssl_certificate: "{{ ssl_cert_path }}"
+      # ssl_certificate_key: "{{ ssl_privkey_path }}"
