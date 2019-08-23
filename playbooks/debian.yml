@@ -37,12 +37,27 @@
       path: "/dev/net/tun"
     register: tun
 
+  - name: Create TUN script
+    copy:
+      dest: /usr/sbin/tunscript.sh
+      content: |
+        #!/bin/bash
+        mkdir /dev/net
+        mknod /dev/net/tun c 10 200
+        chmod 0666 /dev/net/tun
+      mode: 0775
+
   - name: setup TUN/TAP
-    command: "{{ item }}"
-    args:
-      chdir: /dev/
-    with_items:
-      - mkdir net
-      - mknod net/tun c 10 200
-      - chmod 0666 net/tun
+    command: /usr/sbin/tunscript.sh
     when: tun.stat.exists == false
+
+  - name: Test for line
+    shell: grep "/usr/sbin/tunscript.sh" /etc/rc.local
+    register: test_grep
+
+  - name: Insert TUN script at beginning of rc.local
+    lineinfile:
+      path: /etc/rc.local
+      line: /usr/sbin/tunscript
+      insertbefore: BOF
+    when: test_grep.stdout != ""

@@ -106,7 +106,13 @@
   hosts: all
   become: yes
   tasks:
-  - systemd:
+  - name: restart bitlbee
+    systemd:
       name: bitlbee
       state: restarted
       daemon_reload: yes
+
+  - name: check bitlbee started
+    systemd:
+      name: bitlbee
+      state: started

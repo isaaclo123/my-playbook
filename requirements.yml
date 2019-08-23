@@ -6,8 +6,11 @@
 - name: ansible-znc
   src: https://github.com/isaaclo123/ansible-znc
 
-- name: ansible-openvpn
-  src: https://github.com/Stouts/Stouts.openvpn
+# - name: ansible-openvpn
+#   src: https://github.com/isaaclo123/Stouts.openvpn
+
+- name: ansible-role-openvpn
+  src: https://github.com/isaaclo123/ansible-role-openvpn
 
 - src: jdauphant.nginx
 
@@ -16,6 +19,8 @@
 - src: thefinn93.letsencrypt
   # - src: spk.syncthing-debian
 - src: escaped.Syncthing
+
+  # - src: kyl191.openvpn
 
 - src: smaffulli.bitlbee
   # - src: dhellman.znc-on-znc
