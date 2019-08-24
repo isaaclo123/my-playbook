@@ -52,12 +52,15 @@
     when: tun.stat.exists == false
 
   - name: Test for line
-    shell: grep "/usr/sbin/tunscript.sh" /etc/rc.local
+    shell: grep -Fxq "/usr/sbin/tunscript.sh" /etc/rc.local
     register: test_grep
+    check_mode: no
+    ignore_errors: yes
+    changed_when: no
 
   - name: Insert TUN script at beginning of rc.local
     lineinfile:
       path: /etc/rc.local
-      line: /usr/sbin/tunscript
+      line: /usr/sbin/tunscript.sh
       insertbefore: BOF
-    when: test_grep.stdout != ""
+    when: test_grep.rc != 0
