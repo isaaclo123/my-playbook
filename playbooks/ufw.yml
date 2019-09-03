@@ -12,7 +12,7 @@
           - { port: "{{ znc_irc_port }}", rule: allow, comment: 'Allow ZNC'}
           - { port: "{{ http_port }}", rule: allow, comment: 'Allow http'}
           - { port: "{{ https_port }}", rule: allow, comment: 'Allow https'}
-          - { port: "{{ syncthing_listen_port }}", proto: udp, rule: allow, comment: 'Allow syncthing listen'}
+          - { port: "{{ syncthing_listen_port }}", proto: tcp, rule: allow, comment: 'Allow syncthing listen'}
           - { port: "{{ openvpn_server_port }}", proto: udp, rule: allow, comment: 'Allow openvpn'}
         ufw_default_forward_policy: ACCEPT
         ufw_logging: full
