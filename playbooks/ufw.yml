@@ -16,7 +16,7 @@
           - { port: "{{ openvpn_server_port }}", proto: udp, rule: allow, comment: 'Allow openvpn'}
         ufw_default_forward_policy: ACCEPT
         ufw_logging: full
-        ufw_ipv6: "no"
+        ufw_ipv6: "yes"
         # ufw_applications:
         #  - { name: "OpenSSH" }
         handlers:
