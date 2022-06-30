@@ -20,6 +20,6 @@
       letsencrypt_email: "{{ email }}"
       letsencrypt_cert_domains:
         - "{{ domain }}"
-      letsencrypt_renewal_command_args: '--webroot --webroot-path /var/www/vps.isaaclo.site/html/ --renew-hook "systemctl restart nginx"'
+      letsencrypt_renewal_command_args: '--webroot --webroot-path /var/www/{{ domain }}/html/ --renew-hook "systemctl restart nginx"'
       # ssl_certificate: "{{ ssl_cert_path }}"
       # ssl_certificate_key: "{{ ssl_privkey_path }}"
